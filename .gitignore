@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# API key — plain text, never commit
+api-key.local.txt
+*.local.txt
+
+# User data folders — these live outside the app on the user's machine
+# (chosen via the folder picker at runtime)
+Project Folder/
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# R
+.Rhistory

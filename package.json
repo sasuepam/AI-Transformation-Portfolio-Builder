@@ -1,0 +1,28 @@
+{
+  "name": "ai-transform-case-builder",
+  "version": "1.0.0",
+  "description": "AI Transformation Use Case - Business Case Analysis Tool",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui"
+  },
+  "dependencies": {
+    "docx": "^9.7.1",
+    "pptxgenjs": "^4.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "jsdom": "^30.0.1",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.10",
+    "vitest": "^1.6.0"
+  }
+}
