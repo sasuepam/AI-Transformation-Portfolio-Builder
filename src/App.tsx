@@ -5,7 +5,7 @@ import {
 } from './api/filesystem';
 import { computeScore, computeTotalTimeCost, ucGateOk, bcGateOk, guardrailSuggestions, scoreExplanation, scoreTier } from './utils/scoring';
 import { UC_FIELDS, BC_FIELDS } from './utils/fields';
-import { BoardMode } from './components/BoardMode';
+import { AccordionMode } from './components/AccordionMode';
 import { ConversationalMode } from './components/ConversationalMode';
 import { ModeToggle } from './components/ModeToggle';
 import { GuardrailsAICard } from './components/GuardrailsAICard';
@@ -525,7 +525,7 @@ export function App() {
               <ModeToggle mode={ucMode} setMode={setUcMode} />
             </div>
             {ucMode === 'form' ? (
-              <BoardMode title="" fields={UC_FIELDS} data={active} onChange={updateUc} />
+              <AccordionMode fields={UC_FIELDS} data={active} onChange={updateUc} />
             ) : (
               <ConversationalMode fields={UC_FIELDS} data={active} onChange={updateUc} />
             )}
@@ -569,8 +569,7 @@ export function App() {
             </div>
 
             {bcMode === 'form' ? (
-              <BoardMode
-                title=""
+              <AccordionMode
                 fields={BC_FIELDS}
                 data={active.businessCase}
                 onChange={updateBc}
