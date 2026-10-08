@@ -220,12 +220,14 @@ interface SectionProps {
   onChange: (k: string, v: any) => void;
   instanceCtx?: UseCase | null;
   extraAfter?: React.ReactNode;
+  optional?: boolean;
 }
 
-function AccordionSection({ index, name, fields, data, onChange, instanceCtx, extraAfter }: SectionProps) {
+function AccordionSection({ index, name, fields, data, onChange, instanceCtx, extraAfter, optional }: SectionProps) {
   const [open, setOpen] = useState(index === 1);
   const mappedFields = fields.map((f) => withInstanceTerm(f, instanceCtx ?? null));
-  const status = sectionStatus(fields, data);
+  const rawStatus = sectionStatus(fields, data);
+  const status = optional && rawStatus === 'needs-attention' ? 'empty' : rawStatus;
 
   return (
     <div style={{ border: `1px solid ${T.border}`, borderRadius: T.radius, overflow: 'hidden', marginBottom: 12 }}>
@@ -328,6 +330,7 @@ export function AccordionMode({ fields, data, onChange, useCase, onApplyBuildEst
             onChange={onChange}
             instanceCtx={instanceCtx}
             extraAfter={extra.length > 0 ? <>{extra}</> : undefined}
+            optional={g.name === 'AI token cost'}
           />
         );
       })}
