@@ -17,58 +17,45 @@ export function ResourceCard({ f, value, onChange }: ResourceCardProps) {
   const add = () => {
     if (!role.trim() || !timeValue || !people) return;
     onChange(f.key as string, [...items, { role: role.trim(), timeValue, timeUnit, people }]);
-    setRole('');
-    setTimeValue('');
-    setTimeUnit('minutes');
-    setPeople('');
+    setRole(''); setTimeValue(''); setTimeUnit('minutes'); setPeople('');
   };
 
   const remove = (i: number) => onChange(f.key as string, items.filter((_, idx) => idx !== i));
 
+  const inp: React.CSSProperties = {
+    fontSize: 13, padding: '7px 10px', border: '1px solid #e0ddd5', borderRadius: 5,
+    outline: 'none', fontFamily: 'inherit', background: '#fff', boxSizing: 'border-box',
+  };
+
   return (
-    <div style={{ background: '#f4f2ea', border: '1px solid #e6e3d8', borderRadius: 4, padding: '10px 12px', boxSizing: 'border-box' }}>
-      <div style={{ fontSize: 12, fontWeight: 500, marginBottom: 6, textAlign: 'center' }}>{f.label}</div>
-      {items.length === 0 && <div style={{ fontSize: 11, color: '#a3a199', textAlign: 'center', marginBottom: 6 }}>{f.q}</div>}
-      {items.map((it, i) => (
-        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 6, background: '#fff', border: '1px solid #e6e3d8', borderRadius: 4, padding: '4px 8px', marginBottom: 4, fontSize: 11 }}>
-          <span style={{ overflowWrap: 'anywhere' }}>{it.role} — {it.timeValue} {it.timeUnit}, {it.people} people</span>
-          <span onClick={() => remove(i)} style={{ cursor: 'pointer', color: '#a3a199', flexShrink: 0 }}>×</span>
+    <div>
+      <div style={{ fontSize: 13, fontWeight: 500, color: '#666', marginBottom: 8 }}>{f.label}</div>
+      <div style={{ border: '1px solid #e5e3dc', borderRadius: 6, background: '#fff', padding: '12px 14px' }}>
+        {items.length === 0 && (
+          <div style={{ fontSize: 13, color: '#bbb', marginBottom: 8 }}>Add each role, time, and headcount.</div>
+        )}
+        {items.map((it, i) => (
+          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, background: '#f5f4f0', border: '1px solid #eae8e2', borderRadius: 5, padding: '6px 10px', marginBottom: 6, fontSize: 13 }}>
+            <span style={{ overflowWrap: 'anywhere', lineHeight: 1.4 }}>
+              {it.role} — {it.timeValue} {it.timeUnit}, {it.people} {parseInt(it.people) === 1 ? 'person' : 'people'}
+            </span>
+            <span onClick={() => remove(i)} style={{ cursor: 'pointer', color: '#aaa', flexShrink: 0, fontSize: 15 }}>×</span>
+          </div>
+        ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: items.length > 0 ? 8 : 0 }}>
+          <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Role (e.g. developer)" style={{ ...inp, width: '100%' }} />
+          <div style={{ display: 'flex', gap: 6 }}>
+            <input value={timeValue} onChange={(e) => setTimeValue(e.target.value)} type="number" placeholder="Time" style={{ ...inp, flex: 1 }} />
+            <select value={timeUnit} onChange={(e) => setTimeUnit(e.target.value as 'minutes' | 'hours')} style={{ ...inp, flexShrink: 0, cursor: 'pointer' }}>
+              <option value="minutes">minutes</option>
+              <option value="hours">hours</option>
+            </select>
+            <input value={people} onChange={(e) => setPeople(e.target.value)} type="number" placeholder="# people" style={{ ...inp, flex: 1 }} />
+          </div>
+          <button onClick={add} style={{ fontSize: 13, padding: '7px 12px', border: '1px solid #e0ddd5', borderRadius: 5, background: '#fff', cursor: 'pointer', fontWeight: 500, alignSelf: 'flex-start' }}>
+            Add resource
+          </button>
         </div>
-      ))}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 4 }}>
-        <input
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          placeholder="Role, e.g. developer"
-          style={{ boxSizing: 'border-box', width: '100%', fontSize: 11, padding: '4px 6px', border: '1px solid #d8d6cd', borderRadius: 4 }}
-        />
-        <div style={{ display: 'flex', gap: 4 }}>
-          <input
-            value={timeValue}
-            onChange={(e) => setTimeValue(e.target.value)}
-            type="number"
-            placeholder="Time"
-            style={{ flex: 1, minWidth: 0, fontSize: 11, padding: '4px 6px', border: '1px solid #d8d6cd', borderRadius: 4 }}
-          />
-          <select
-            value={timeUnit}
-            onChange={(e) => setTimeUnit(e.target.value as 'minutes' | 'hours')}
-            style={{ fontSize: 11, border: '1px solid #d8d6cd', borderRadius: 4, background: '#fff', flexShrink: 0 }}
-          >
-            <option value="minutes">minutes</option>
-            <option value="hours">hours</option>
-          </select>
-        </div>
-        <input
-          value={people}
-          onChange={(e) => setPeople(e.target.value)}
-          type="number"
-          placeholder="Number of people"
-          style={{ boxSizing: 'border-box', width: '100%', fontSize: 11, padding: '4px 6px', border: '1px solid #d8d6cd', borderRadius: 4 }}
-        />
-        <button onClick={add} style={{ fontSize: 11, padding: '4px 8px', border: '1px solid #d8d6cd', borderRadius: 4, background: '#fff', cursor: 'pointer' }}>
-          Add resource
-        </button>
       </div>
     </div>
   );

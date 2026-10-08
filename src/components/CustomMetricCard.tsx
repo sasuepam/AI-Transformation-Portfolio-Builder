@@ -16,47 +16,39 @@ export function CustomMetricCard({ f, value, onChange }: CustomMetricCardProps) 
   const add = () => {
     if (!name.trim()) return;
     onChange(f.key, [...items, { name: name.trim(), val: val.trim(), measure: measure.trim() }]);
-    setName('');
-    setVal('');
-    setMeasure('');
+    setName(''); setVal(''); setMeasure('');
   };
 
   const remove = (i: number) => onChange(f.key, items.filter((_, idx) => idx !== i));
 
+  const inp: React.CSSProperties = {
+    boxSizing: 'border-box', width: '100%', fontSize: 13, padding: '7px 10px',
+    border: '1px solid #e0ddd5', borderRadius: 5, outline: 'none', fontFamily: 'inherit', background: '#fff',
+  };
+
   return (
-    <div style={{ background: '#f4f2ea', border: '1px solid #e6e3d8', borderRadius: 4, padding: '10px 12px', boxSizing: 'border-box' }}>
-      <div style={{ fontSize: 12, fontWeight: 500, marginBottom: 6, textAlign: 'center' }}>{f.label}</div>
-      {items.length === 0 && <div style={{ fontSize: 11, color: '#a3a199', textAlign: 'center', marginBottom: 6 }}>{f.q}</div>}
-      {items.map((it, i) => (
-        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 6, background: '#fff', border: '1px solid #e6e3d8', borderRadius: 4, padding: '4px 8px', marginBottom: 4, fontSize: 11 }}>
-          <span style={{ overflowWrap: 'anywhere' }}>
-            {it.name}{it.val ? `: ${it.val}` : ''}{it.measure ? ` (${it.measure})` : ''}
-          </span>
-          <span onClick={() => remove(i)} style={{ cursor: 'pointer', color: '#a3a199', flexShrink: 0 }}>×</span>
+    <div>
+      <div style={{ fontSize: 13, fontWeight: 500, color: '#666', marginBottom: 8 }}>{f.label}</div>
+      <div style={{ border: '1px solid #e5e3dc', borderRadius: 6, background: '#fff', padding: '12px 14px' }}>
+        {items.length === 0 && (
+          <div style={{ fontSize: 13, color: '#bbb', marginBottom: 8 }}>{f.q}</div>
+        )}
+        {items.map((it, i) => (
+          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, background: '#f5f4f0', border: '1px solid #eae8e2', borderRadius: 5, padding: '6px 10px', marginBottom: 6, fontSize: 13 }}>
+            <span style={{ overflowWrap: 'anywhere', lineHeight: 1.4 }}>
+              {it.name}{it.val ? `: ${it.val}` : ''}{it.measure ? ` (${it.measure})` : ''}
+            </span>
+            <span onClick={() => remove(i)} style={{ cursor: 'pointer', color: '#aaa', flexShrink: 0, fontSize: 15 }}>×</span>
+          </div>
+        ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: items.length > 0 ? 8 : 0 }}>
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Metric name, e.g. error rate" style={inp} />
+          <input value={val} onChange={(e) => setVal(e.target.value)} placeholder="Value, e.g. 4%" style={inp} />
+          <input value={measure} onChange={(e) => setMeasure(e.target.value)} placeholder="How it's measured" style={inp} />
+          <button onClick={add} style={{ fontSize: 13, padding: '7px 12px', border: '1px solid #e0ddd5', borderRadius: 5, background: '#fff', cursor: 'pointer', fontWeight: 500, alignSelf: 'flex-start' }}>
+            Add metric
+          </button>
         </div>
-      ))}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 4 }}>
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Metric name, e.g. error rate"
-          style={{ boxSizing: 'border-box', width: '100%', fontSize: 11, padding: '4px 6px', border: '1px solid #d8d6cd', borderRadius: 4 }}
-        />
-        <input
-          value={val}
-          onChange={(e) => setVal(e.target.value)}
-          placeholder="Value, e.g. 4%"
-          style={{ boxSizing: 'border-box', width: '100%', fontSize: 11, padding: '4px 6px', border: '1px solid #d8d6cd', borderRadius: 4 }}
-        />
-        <input
-          value={measure}
-          onChange={(e) => setMeasure(e.target.value)}
-          placeholder="How it's measured"
-          style={{ boxSizing: 'border-box', width: '100%', fontSize: 11, padding: '4px 6px', border: '1px solid #d8d6cd', borderRadius: 4 }}
-        />
-        <button onClick={add} style={{ fontSize: 11, padding: '4px 8px', border: '1px solid #d8d6cd', borderRadius: 4, background: '#fff', cursor: 'pointer' }}>
-          Add metric
-        </button>
       </div>
     </div>
   );

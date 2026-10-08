@@ -20,32 +20,36 @@ export function NumListCard({ f, value, onChange }: NumListCardProps) {
   const remove = (i: number) => onChange(f.key, items.filter((_, idx) => idx !== i));
 
   return (
-    <div style={{ background: '#f4f2ea', border: '1px solid #e6e3d8', borderRadius: 4, padding: '10px 12px', boxSizing: 'border-box' }}>
-      <div style={{ fontSize: 12, fontWeight: 500, marginBottom: 6, textAlign: 'center' }}>{f.label}</div>
-      {items.length === 0 && <div style={{ fontSize: 11, color: '#a3a199', textAlign: 'center', marginBottom: 6 }}>{f.q}</div>}
-      {items.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 4 }}>
-          {items.map((it, i) => (
-            <span
-              key={i}
-              onClick={() => remove(i)}
-              style={{ background: '#fff', border: '1px solid #e6e3d8', borderRadius: 10, padding: '2px 8px', fontSize: 11, cursor: 'pointer' }}
-            >
-              {it} ×
-            </span>
-          ))}
+    <div>
+      <div style={{ fontSize: 13, fontWeight: 500, color: '#666', marginBottom: 8 }}>{f.label}</div>
+      <div style={{ border: '1px solid #e5e3dc', borderRadius: 6, background: '#fff', padding: '10px 12px' }}>
+        {items.length === 0 && (
+          <div style={{ fontSize: 13, color: '#bbb', marginBottom: 6 }}>{f.q}</div>
+        )}
+        {items.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+            {items.map((it, i) => (
+              <span
+                key={i}
+                onClick={() => remove(i)}
+                style={{ background: '#f5f4f0', border: '1px solid #eae8e2', borderRadius: 14, padding: '3px 10px', fontSize: 13, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 5 }}
+              >
+                {it} <span style={{ color: '#aaa', fontSize: 14 }}>×</span>
+              </span>
+            ))}
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: 6 }}>
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            type="number"
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add(); } }}
+            placeholder="Add a number, then Enter or +"
+            style={{ flex: 1, minWidth: 0, fontSize: 13, padding: '7px 10px', border: '1px solid #e0ddd5', borderRadius: 5, outline: 'none', fontFamily: 'inherit' }}
+          />
+          <button onClick={add} style={{ fontSize: 13, padding: '7px 12px', border: '1px solid #e0ddd5', borderRadius: 5, background: '#fff', cursor: 'pointer', fontWeight: 500 }}>+</button>
         </div>
-      )}
-      <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
-        <input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          type="number"
-          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add(); } }}
-          placeholder="Add a number"
-          style={{ flex: 1, minWidth: 0, fontSize: 11, padding: '4px 6px', border: '1px solid #d8d6cd', borderRadius: 4 }}
-        />
-        <button onClick={add} style={{ fontSize: 11, padding: '4px 8px', border: '1px solid #d8d6cd', borderRadius: 4, background: '#fff', cursor: 'pointer' }}>+</button>
       </div>
     </div>
   );

@@ -50,14 +50,20 @@ function hasValue(f: FieldDef, data: any): boolean {
   const v = data?.[f.key];
   if (f.type === 'list' || f.type === 'numlist' || f.type === 'resources')
     return Array.isArray(v) && v.length > 0;
-  if (f.type === 'range') return Array.isArray(v) && v.some((x: any) => x != null && x !== '');
+  if (f.type === 'range') {
+    const rv = v as any;
+    return rv != null && (rv.low != null && rv.low !== '' || rv.high != null && rv.high !== '');
+  }
   if (f.type === 'custom') return Array.isArray(v) && v.length > 0;
   return v != null && v !== '';
 }
 
 function sectionStatus(fields: FieldDef[], data: any): 'complete' | 'needs-attention' | 'empty' {
-  const filled = fields.filter((f) => hasValue(f, data)).length;
+  // Exclude purely optional types from the completion check
+  const scorable = fields.filter((f) => f.type !== 'custom');
+  const filled = scorable.filter((f) => hasValue(f, data)).length;
   if (filled === 0) return 'empty';
+  if (filled === scorable.length) return 'complete';
   if (filled === fields.length) return 'complete';
   return 'needs-attention';
 }
@@ -92,36 +98,12 @@ function AccordionField({ f, value, onChange }: { f: FieldDef; value: any; onCha
   const [draft, setDraft] = useState(value ?? '');
   useEffect(() => { setDraft(value ?? ''); }, [value]);
 
-  if (f.type === 'list') return (
-    <div>
-      <label style={{ fontSize: 13, fontWeight: 500, color: T.textSecondary, display: 'block', marginBottom: 6 }}>{f.label}</label>
-      <ListCard f={f} value={value} onChange={onChange} />
-    </div>
-  );
-  if (f.type === 'resources') return (
-    <div>
-      <label style={{ fontSize: 13, fontWeight: 500, color: T.textSecondary, display: 'block', marginBottom: 6 }}>{f.label}</label>
-      <ResourceCard f={f} value={value} onChange={onChange} />
-    </div>
-  );
-  if (f.type === 'numlist') return (
-    <div>
-      <label style={{ fontSize: 13, fontWeight: 500, color: T.textSecondary, display: 'block', marginBottom: 6 }}>{f.label}</label>
-      <NumListCard f={f} value={value} onChange={onChange} />
-    </div>
-  );
-  if (f.type === 'range') return (
-    <div>
-      <label style={{ fontSize: 13, fontWeight: 500, color: T.textSecondary, display: 'block', marginBottom: 6 }}>{f.label}</label>
-      <RangeCard f={f} value={value} onChange={onChange} />
-    </div>
-  );
-  if (f.type === 'custom') return (
-    <div>
-      <label style={{ fontSize: 13, fontWeight: 500, color: T.textSecondary, display: 'block', marginBottom: 6 }}>{f.label}</label>
-      <CustomMetricCard f={f} value={value} onChange={onChange} />
-    </div>
-  );
+  // These components render their own label
+  if (f.type === 'list') return <ListCard f={f} value={value} onChange={onChange} />;
+  if (f.type === 'resources') return <ResourceCard f={f} value={value} onChange={onChange} />;
+  if (f.type === 'numlist') return <NumListCard f={f} value={value} onChange={onChange} />;
+  if (f.type === 'range') return <RangeCard f={f} value={value} onChange={onChange} />;
+  if (f.type === 'custom') return <CustomMetricCard f={f} value={value} onChange={onChange} />;
   if (f.type === 'select') return (
     <div>
       <label style={{ fontSize: 13, fontWeight: 500, color: T.textSecondary, display: 'block', marginBottom: 6 }}>{f.label}</label>
@@ -166,7 +148,7 @@ function AccordionField({ f, value, onChange }: { f: FieldDef; value: any; onCha
 
 // ── Computed outputs section (BC only) ────────────────────────────────────────
 function ComputedSection({ data, useCase, index }: { data: BusinessCase; useCase: UseCase; index: number }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const bcOut = computeBusinessCaseOutputs(data);
   const ucForTerm = useCase;
 
@@ -241,7 +223,7 @@ interface SectionProps {
 }
 
 function AccordionSection({ index, name, fields, data, onChange, instanceCtx, extraAfter }: SectionProps) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(index === 1);
   const mappedFields = fields.map((f) => withInstanceTerm(f, instanceCtx ?? null));
   const status = sectionStatus(fields, data);
 

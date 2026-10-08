@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { FieldDef } from '../types/index';
-
-const CARD_MIN_HEIGHT = 56;
 
 interface ListCardProps {
   f: FieldDef;
@@ -20,24 +18,28 @@ export function ListCard({ f, value, onChange }: ListCardProps) {
   const remove = (i: number) => onChange(f.key as string, items.filter((_, idx) => idx !== i));
 
   return (
-    <div style={{ background: '#f4f2ea', border: '1px solid #e6e3d8', borderRadius: 4, padding: '10px 12px', boxSizing: 'border-box' }}>
-      <div style={{ fontSize: 12, fontWeight: 500, marginBottom: 6, textAlign: 'center' }}>{f.label}</div>
-      {items.length === 0 && <div style={{ fontSize: 11, color: '#a3a199', textAlign: 'center', marginBottom: 6 }}>{f.q}</div>}
-      {items.map((it, i) => (
-        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 6, background: '#fff', border: '1px solid #e6e3d8', borderRadius: 4, padding: '4px 8px', marginBottom: 4, fontSize: 11 }}>
-          <span style={{ overflowWrap: 'anywhere' }}>{it}</span>
-          <span onClick={() => remove(i)} style={{ cursor: 'pointer', color: '#a3a199', flexShrink: 0 }}>×</span>
+    <div>
+      <div style={{ fontSize: 13, fontWeight: 500, color: '#666', marginBottom: 8 }}>{f.label}</div>
+      <div style={{ border: '1px solid #e5e3dc', borderRadius: 6, background: '#fff', padding: '10px 12px' }}>
+        {items.length === 0 && (
+          <div style={{ fontSize: 13, color: '#bbb', marginBottom: 6 }}>{f.q}</div>
+        )}
+        {items.map((it, i) => (
+          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, background: '#f5f4f0', border: '1px solid #eae8e2', borderRadius: 5, padding: '5px 10px', marginBottom: 6, fontSize: 13 }}>
+            <span style={{ overflowWrap: 'anywhere', lineHeight: 1.4 }}>{it}</span>
+            <span onClick={() => remove(i)} style={{ cursor: 'pointer', color: '#aaa', flexShrink: 0, fontSize: 15, lineHeight: 1 }}>×</span>
+          </div>
+        ))}
+        <div style={{ display: 'flex', gap: 6, marginTop: items.length > 0 ? 4 : 0 }}>
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add(); } }}
+            placeholder="Add item, then Enter or +"
+            style={{ flex: 1, minWidth: 0, fontSize: 13, padding: '7px 10px', border: '1px solid #e0ddd5', borderRadius: 5, outline: 'none', fontFamily: 'inherit' }}
+          />
+          <button onClick={add} style={{ fontSize: 13, padding: '7px 12px', border: '1px solid #e0ddd5', borderRadius: 5, background: '#fff', cursor: 'pointer', fontWeight: 500 }}>+</button>
         </div>
-      ))}
-      <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
-        <input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add(); } }}
-          placeholder="Add item"
-          style={{ flex: 1, minWidth: 0, fontSize: 11, padding: '4px 6px', border: '1px solid #d8d6cd', borderRadius: 4 }}
-        />
-        <button onClick={add} style={{ fontSize: 11, padding: '4px 8px', border: '1px solid #d8d6cd', borderRadius: 4, background: '#fff', cursor: 'pointer' }}>+</button>
       </div>
     </div>
   );
