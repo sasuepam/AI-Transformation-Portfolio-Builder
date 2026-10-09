@@ -13,6 +13,7 @@ import { ScoreVisual } from './components/ScoreVisual';
 import { exportDeck } from './utils/exportDeck';
 import { exportDoc } from './utils/exportDoc';
 import type { UseCase, BusinessCase } from './types/index';
+import { type Currency, CURRENCIES, symbolFor, loadCurrency, saveCurrency } from './utils/currency';
 
 // Design tokens
 const T = {
@@ -125,9 +126,9 @@ function recFromTier(tierName: string | undefined): { label: string; sub: string
   return { label: 'Proceed', sub: 'Strong return — ready for a decision.' };
 }
 
-function ExportDeckButton({ useCase }: { useCase: UseCase }) {
+function ExportDeckButton({ useCase, currencySymbol }: { useCase: UseCase; currencySymbol: string }) {
   const [busy, setBusy] = React.useState(false);
-  const run = async () => { setBusy(true); try { exportDeck(useCase); } finally { setBusy(false); } };
+  const run = async () => { setBusy(true); try { exportDeck(useCase, currencySymbol); } finally { setBusy(false); } };
   return (
     <button onClick={run} disabled={busy} style={{ ...btnSecondarySmall, cursor: busy ? 'wait' : 'pointer' }}>
       {busy ? 'Building…' : '↓ Export deck'}
@@ -135,9 +136,9 @@ function ExportDeckButton({ useCase }: { useCase: UseCase }) {
   );
 }
 
-function ExportDocButton({ useCase }: { useCase: UseCase }) {
+function ExportDocButton({ useCase, currencySymbol }: { useCase: UseCase; currencySymbol: string }) {
   const [busy, setBusy] = React.useState(false);
-  const run = async () => { setBusy(true); try { await exportDoc(useCase); } finally { setBusy(false); } };
+  const run = async () => { setBusy(true); try { await exportDoc(useCase, currencySymbol); } finally { setBusy(false); } };
   return (
     <button onClick={run} disabled={busy} style={{ ...btnSecondarySmall, cursor: busy ? 'wait' : 'pointer' }}>
       {busy ? 'Building…' : '↓ Export doc'}
@@ -159,6 +160,11 @@ export function App() {
   const [status, setStatus] = useState('');
   const [search, setSearch] = useState('');
   const saveTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  const [currency, setCurrency] = useState<Currency | null>(loadCurrency);
+  const currencySymbol = currency ? symbolFor(currency) : '$';
+
+  const pickCurrency = (c: Currency) => { saveCurrency(c); setCurrency(c); };
 
   const chooseFolder = async () => {
     try {
@@ -274,6 +280,33 @@ export function App() {
     );
   }
 
+  // ── Currency picker (first-run) ──────────────────────────────────────────
+  if (currency === null) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: T.bg, padding: 40 }}>
+        <div style={{ maxWidth: 440, background: T.card, borderRadius: T.radius, border: `1px solid ${T.border}`, padding: '40px 48px' }}>
+          <h2 style={{ fontSize: 24, fontWeight: 800, margin: '0 0 8px', letterSpacing: -0.5 }}>Welcome</h2>
+          <p style={{ fontSize: 15, color: T.textSecondary, lineHeight: 1.6, margin: '0 0 28px' }}>
+            Which currency should financial figures be shown in?<br />
+            <span style={{ fontSize: 13, color: T.textMuted }}>AI token costs are priced in USD and will be converted automatically.</span>
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {CURRENCIES.map((c) => (
+              <button
+                key={c.code}
+                onClick={() => pickCurrency(c.code)}
+                style={{ ...btnSecondary, justifyContent: 'flex-start', padding: '14px 18px', borderRadius: T.radiusSm, fontSize: 15 }}
+              >
+                <span style={{ fontSize: 20, marginRight: 12 }}>{c.symbol}</span>
+                {c.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ── Folder picker ────────────────────────────────────────────────────────
   if (!rootHandle) {
     return (
@@ -376,11 +409,14 @@ export function App() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {status && <span style={{ fontSize: 12, color: T.textMuted }}>{status}</span>}
+          <button onClick={() => setCurrency(null)} style={{ ...btnSecondarySmall, fontWeight: 500 }} title="Change currency">
+            {currency}
+          </button>
           <button onClick={refreshFromDisk} style={btnSecondarySmall}>Refresh</button>
           {active && (
             <div style={{ display: 'flex', gap: 8 }}>
-              <ExportDeckButton useCase={active} />
-              <ExportDocButton useCase={active} />
+              <ExportDeckButton useCase={active} currencySymbol={currencySymbol} />
+              <ExportDocButton useCase={active} currencySymbol={currencySymbol} />
             </div>
           )}
         </div>
@@ -447,7 +483,7 @@ export function App() {
                           <StatusPill complete={c.bcComplete} inProgress={c.ucComplete && !c.bcComplete} />
                         </td>
                         <td style={{ padding: '14px 16px', color: T.textSecondary }}>{c.businessCase.confidence || '—'}</td>
-                        <td style={{ padding: '14px 16px', fontWeight: 700, fontSize: 15 }} title={score ? (scoreExplanation(score) ?? undefined) : undefined}>
+                        <td style={{ padding: '14px 16px', fontWeight: 700, fontSize: 15 }} title={score ? (scoreExplanation(score, currencySymbol) ?? undefined) : undefined}>
                           {score?.raw != null ? score.raw : <span style={{ color: T.textMuted, fontWeight: 400 }}>Not scored</span>}
                         </td>
                         <td style={{ padding: '14px 16px' }}>
@@ -631,7 +667,7 @@ export function App() {
               </button>
               {active.bcComplete && (() => {
                 const score = computeScore(active);
-                return score?.raw != null ? <ScoreVisual score={score} /> : null;
+                return score?.raw != null ? <ScoreVisual score={score} currencySymbol={currencySymbol} /> : null;
               })()}
             </div>
           </div>

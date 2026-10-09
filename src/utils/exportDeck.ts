@@ -2,7 +2,8 @@ import PptxGenJS from 'pptxgenjs';
 import type { UseCase } from '../types/index';
 import { computeScore, scoreTier, guardrailSuggestions, computeCumulative, deriveQualitativeBenefits } from './scoring';
 
-export function exportDeck(useCase: UseCase): void {
+export function exportDeck(useCase: UseCase, currencySymbol = '$'): void {
+  const s = currencySymbol;
   const pptx = new PptxGenJS();
   pptx.layout = 'LAYOUT_16x9';
   const ink = '2C2C2A', muted = '5F5E5A', cream = 'F4F2EA', line = 'E6E3D8';
@@ -50,10 +51,10 @@ export function exportDeck(useCase: UseCase): void {
     s2.addText('ROI at the median rate tested', { x: 0.5, y: 2.25, w: 3.5, h: 0.4, fontSize: 10, color: muted });
 
     const stats: [string, string][] = [
-      ['Benefit / yr', `$${m.value}`],
-      ['Running cost / yr', `$${m.opex}`],
-      ['Net return / yr', `$${m.netAnnual}`],
-      ['Build cost', `$${m.capex}`],
+      ['Benefit / yr', `${s}${m.value}`],
+      ['Running cost / yr', `${s}${m.opex}`],
+      ['Net return / yr', `${s}${m.netAnnual}`],
+      ['Build cost', `${s}${m.capex}`],
       ['Payback', m.paybackMonths != null ? `${m.paybackMonths} mo` : 'not reached'],
       ['Confidence', `${score.confidence || 'not set'} (×${score.weight})`],
       ['3-yr cumulative ROI', cumRoi3 != null ? `${cumRoi3}%` : 'n/a'],

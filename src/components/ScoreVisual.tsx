@@ -28,12 +28,14 @@ export function ScoreLegend() {
 
 interface Props {
   score: ScoreResult;
+  currencySymbol?: string;
 }
 
-export function ScoreVisual({ score }: Props) {
+export function ScoreVisual({ score, currencySymbol = '$' }: Props) {
   if (score.raw == null) return null;
   const m = score.mid;
   const tier = scoreTier(score.roi);
+  const s = currencySymbol;
 
   const primaryStats = [
     {
@@ -54,10 +56,10 @@ export function ScoreVisual({ score }: Props) {
   ];
 
   const secondaryStats = [
-    { label: 'BENEFIT / YEAR', value: `$${m.value.toLocaleString()}` },
-    { label: 'RUNNING COST / YEAR', value: `$${m.opex.toLocaleString()}` },
-    { label: 'NET RETURN / YEAR', value: `$${m.netAnnual.toLocaleString()}` },
-    { label: 'BUILD COST', value: `$${m.capex.toLocaleString()}` },
+    { label: 'BENEFIT / YEAR', value: `${s}${m.value.toLocaleString()}` },
+    { label: 'RUNNING COST / YEAR', value: `${s}${m.opex.toLocaleString()}` },
+    { label: 'NET RETURN / YEAR', value: `${s}${m.netAnnual.toLocaleString()}` },
+    { label: 'BUILD COST', value: `${s}${m.capex.toLocaleString()}` },
   ];
 
   const boundaries = [0, 50, 150, 400];
@@ -76,11 +78,11 @@ export function ScoreVisual({ score }: Props) {
 
       {/* Primary stat tiles */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24, marginBottom: 24 }}>
-        {primaryStats.map((s) => (
-          <div key={s.label}>
-            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.8, color: '#999', textTransform: 'uppercase', marginBottom: 6 }}>{s.label}</div>
-            <div style={{ fontSize: 36, fontWeight: 800, letterSpacing: -1, color: '#111', marginBottom: 4 }}>{s.value}</div>
-            <div style={{ fontSize: 12, color: '#888' }}>{s.sub}</div>
+        {primaryStats.map((st) => (
+          <div key={st.label}>
+            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.8, color: '#999', textTransform: 'uppercase', marginBottom: 6 }}>{st.label}</div>
+            <div style={{ fontSize: 36, fontWeight: 800, letterSpacing: -1, color: '#111', marginBottom: 4 }}>{st.value}</div>
+            <div style={{ fontSize: 12, color: '#888' }}>{st.sub}</div>
           </div>
         ))}
       </div>
@@ -89,7 +91,7 @@ export function ScoreVisual({ score }: Props) {
         {/* Narrative */}
         <p style={{ fontSize: 14, color: '#555', lineHeight: 1.7, margin: '0 0 20px' }}>
           {tier && <><b style={{ color: tier.color }}>{tier.tier}</b> — {tier.note}. </>}
-          At ${m.rate}/hr: benefit ~${m.value.toLocaleString()}/yr, running cost ~${m.opex.toLocaleString()}/yr, and net annual return ~${m.netAnnual.toLocaleString()}/yr against a build cost of ~${m.capex.toLocaleString()}.
+          At {s}{m.rate}/hr: benefit ~{s}{m.value.toLocaleString()}/yr, running cost ~{s}{m.opex.toLocaleString()}/yr, and net annual return ~{s}{m.netAnnual.toLocaleString()}/yr against a build cost of ~{s}{m.capex.toLocaleString()}.
         </p>
 
         {/* ROI colour gauge */}
@@ -113,16 +115,16 @@ export function ScoreVisual({ score }: Props) {
 
       {/* Secondary stat tiles */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, paddingTop: 4 }}>
-        {secondaryStats.map((s) => (
-          <div key={s.label}>
-            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.8, color: '#999', textTransform: 'uppercase', marginBottom: 6 }}>{s.label}</div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: '#111' }}>{s.value}</div>
+        {secondaryStats.map((st) => (
+          <div key={st.label}>
+            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.8, color: '#999', textTransform: 'uppercase', marginBottom: 6 }}>{st.label}</div>
+            <div style={{ fontSize: 24, fontWeight: 800, color: '#111' }}>{st.value}</div>
           </div>
         ))}
       </div>
 
       <div style={{ marginTop: 16, fontSize: 12, color: '#aaa' }}>
-        Confidence: {score.confidence || 'not set'} (×{score.weight} weight). At ${m.rate}/hr — the median of the rates you tested.
+        Confidence: {score.confidence || 'not set'} (×{score.weight} weight). At {s}{m.rate}/hr — the median of the rates you tested.
       </div>
     </div>
   );

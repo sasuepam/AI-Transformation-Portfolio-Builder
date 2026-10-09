@@ -8,7 +8,8 @@ import {
   guardrailSuggestions, instanceTerm, deriveQualitativeBenefits, computeCumulative,
 } from './scoring';
 
-export async function exportDoc(useCase: UseCase): Promise<void> {
+export async function exportDoc(useCase: UseCase, currencySymbol = '$'): Promise<void> {
+  const s = currencySymbol;
   const bc = useCase.businessCase || {};
   const out = computeBusinessCaseOutputs(bc);
   const score = computeScore(useCase);
@@ -51,7 +52,7 @@ export async function exportDoc(useCase: UseCase): Promise<void> {
     const header = ['Hourly rate', 'Benefit/yr', 'Running cost/yr', 'Net return/yr', 'Build cost', 'Payback', 'ROI'];
     const widths = [1400, 1500, 1700, 1600, 1400, 1200, 1400];
     const rows = (out ? out.perRate : []).map((r) => [
-      `$${r.rate}/hr`, `$${r.value}`, `$${r.opex}`, `$${r.netAnnual}`, `$${r.capex}`,
+      `${s}${r.rate}/hr`, `${s}${r.value}`, `${s}${r.opex}`, `${s}${r.netAnnual}`, `${s}${r.capex}`,
       r.paybackMonths != null ? `${r.paybackMonths.toFixed(1)} mo` : 'n/a',
       r.capex ? `${Math.round((r.netAnnual / r.capex) * 100)}%` : 'n/a',
     ] as string[]);
@@ -92,9 +93,9 @@ export async function exportDoc(useCase: UseCase): Promise<void> {
       columnWidths: colWidths,
       rows: [
         mkRow(['Metric', 'Year 1', 'Year 2', 'Year 3'], true),
-        mkRow(['Build cost (one-off)', `$${f.capex}`, '—', '—'], false),
-        mkRow(['Running cost / yr', `$${f.opex}`, `$${f.opex}`, `$${f.opex}`], false),
-        mkRow(['Cost saving / yr', `$${f.value}`, `$${f.value}`, `$${f.value}`], false),
+        mkRow(['Build cost (one-off)', `${s}${f.capex}`, '—', '—'], false),
+        mkRow(['Running cost / yr', `${s}${f.opex}`, `${s}${f.opex}`, `${s}${f.opex}`], false),
+        mkRow(['Cost saving / yr', `${s}${f.value}`, `${s}${f.value}`, `${s}${f.value}`], false),
         mkRow(['Cumulative ROI', roi(0), roi(1), roi(2)], false),
       ],
     });
@@ -113,7 +114,7 @@ export async function exportDoc(useCase: UseCase): Promise<void> {
     H('1. Executive Summary'),
     P(useCase.problem || 'No problem statement recorded yet.'),
     score && score.raw != null
-      ? P(`Projected ROI: ${score.roi}% (${tier ? tier.tier : 'unscored'}) at $${score.mid.rate}/hr, the median rate tested, with ${score.mid.paybackMonths != null ? `a payback of roughly ${score.mid.paybackMonths} months` : 'payback not yet reached at this rate'}.`)
+      ? P(`Projected ROI: ${score.roi}% (${tier ? tier.tier : 'unscored'}) at ${s}${score.mid.rate}/hr, the median rate tested, with ${score.mid.paybackMonths != null ? `a payback of roughly ${score.mid.paybackMonths} months` : 'payback not yet reached at this rate'}.`)
       : warn("This case hasn't been scored yet — fill in the business case's raw inputs and a goal to compute a business case."),
 
     H('2. Current State'),
@@ -147,8 +148,8 @@ export async function exportDoc(useCase: UseCase): Promise<void> {
     ]),
     H2('AI token cost (computed from model + token counts)'),
     statTable([
-      [`Build phase — ${bc.buildModel || 'not selected'}`, out ? `$${Math.round(out.buildTokMid)}` : '—'],
-      [`Running phase — ${bc.runningModel || 'not selected'}`, out ? `$${out.runningTokMid}/yr` : '—'],
+      [`Build phase — ${bc.buildModel || 'not selected'}`, out ? `${s}${Math.round(out.buildTokMid)}` : '—'],
+      [`Running phase — ${bc.runningModel || 'not selected'}`, out ? `${s}${out.runningTokMid}/yr` : '—'],
     ]),
     H2('Cost–benefit by hourly rate'),
     out && out.perRate.length ? costBenefitTable() : P('No hourly rates entered yet.'),

@@ -157,11 +157,11 @@ export function scoreTier(roi: number | null): ScoreTier | null {
   return SCORE_LEGEND.find((band) => roi < band.max) || SCORE_LEGEND[SCORE_LEGEND.length - 1];
 }
 
-export function scoreExplanation(score: ScoreResult): string | null {
+export function scoreExplanation(score: ScoreResult, sym = '$'): string | null {
   if (!score || score.raw == null) return null;
   const m = score.mid;
   const tier = scoreTier(score.roi);
-  return `${tier ? `${tier.tier} — ${tier.note}. ` : ''}At $${m.rate}/hr (median of the rates tested): benefit ~$${m.value}/yr, running cost ~$${m.opex}/yr, net annual return ~$${m.netAnnual}/yr against a build cost of ~$${m.capex}. ROI ~${score.roi}%${m.paybackMonths != null ? `, payback in ~${m.paybackMonths} months` : ', payback not reached at this rate'}. Confidence: ${score.confidence} (×${score.weight} weight). The raw score (${score.raw}) is ROI × confidence weight — it's a ranking number for sorting the portfolio, not a percentage or currency figure on its own.`;
+  return `${tier ? `${tier.tier} — ${tier.note}. ` : ''}At ${sym}${m.rate}/hr (median of the rates tested): benefit ~${sym}${m.value}/yr, running cost ~${sym}${m.opex}/yr, net annual return ~${sym}${m.netAnnual}/yr against a build cost of ~${sym}${m.capex}. ROI ~${score.roi}%${m.paybackMonths != null ? `, payback in ~${m.paybackMonths} months` : ', payback not reached at this rate'}. Confidence: ${score.confidence} (×${score.weight} weight). The raw score (${score.raw}) is ROI × confidence weight — it's a ranking number for sorting the portfolio, not a percentage or currency figure on its own.`;
 }
 
 export interface TimeCostResult {
