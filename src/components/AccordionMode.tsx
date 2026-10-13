@@ -5,7 +5,7 @@ import { NumListCard } from './NumListCard';
 import { RangeCard } from './RangeCard';
 import { CustomMetricCard } from './CustomMetricCard';
 import { BuildEstimateCard } from './BuildEstimateCard';
-import { computeTotalTimeCost, computeBusinessCaseOutputs, instanceTerm } from '../utils/scoring';
+import { computeTotalTimeCost, computeBusinessCaseOutputs, computeAugmentationValue, instanceTerm } from '../utils/scoring';
 import { groupFields, FRAME_SUBTITLES, BC_FIELDS } from '../utils/fields';
 import type { FieldDef, UseCase, BusinessCase } from '../types/index';
 
@@ -147,10 +147,11 @@ function AccordionField({ f, value, onChange }: { f: FieldDef; value: any; onCha
 }
 
 // ── Computed outputs section (BC only) ────────────────────────────────────────
-function ComputedSection({ data, useCase, index }: { data: BusinessCase; useCase: UseCase; index: number }) {
+function ComputedSection({ data, useCase, index, currencySymbol }: { data: BusinessCase; useCase: UseCase; index: number; currencySymbol: string }) {
   const [open, setOpen] = useState(false);
   const bcOut = computeBusinessCaseOutputs(data);
   const ucForTerm = useCase;
+  const s = currencySymbol;
 
   const items: Array<{ label: string; value: string; highlight?: boolean }> = [];
   if (!bcOut) {
@@ -161,14 +162,14 @@ function ComputedSection({ data, useCase, index }: { data: BusinessCase; useCase
     items.push({ label: `Time saved / ${instanceTerm(ucForTerm)}`, value: `${Math.round(bcOut.savedPerInstance * 10) / 10} min` });
     items.push({ label: `Avg ${instanceTerm(ucForTerm, true)} / sprint`, value: `${Math.round(bcOut.avgPerSprint * 10) / 10}` });
     items.push({ label: 'Time saved / year', value: `~${bcOut.savedPerYearHrs} hours (~${bcOut.instancesPerYear} ${instanceTerm(ucForTerm, true)}/yr)` });
-    items.push({ label: 'Build-phase token cost', value: `$${Math.round(bcOut.buildTokMid)}` });
-    items.push({ label: `Running token cost / year`, value: `$${bcOut.runningTokMid}` });
+    items.push({ label: 'Build-phase token cost (USD)', value: `$${Math.round(bcOut.buildTokMid)}` });
+    items.push({ label: 'Running token cost / year (USD)', value: `$${bcOut.runningTokMid}` });
     items.push({ label: 'Suggested confidence', value: `${bcOut.suggestedConfidence} (${bcOut.pollN} poll responses, ${bcOut.sprintN} sprints)`, highlight: true });
     if (bcOut.perRate.length === 0) {
       items.push({ label: 'Value by rate', value: 'Add at least one hourly rate to calculate value, cost, and payback' });
     } else {
       bcOut.perRate.forEach((r) => {
-        items.push({ label: `At $${r.rate}/hr`, value: `Value: $${r.value}/yr · Build cost: $${r.capex} · Running: $${r.opex}/yr · Payback: ${r.paybackMonths != null ? r.paybackMonths + ' mo' : 'n/a'}`, highlight: true });
+        items.push({ label: `At ${s}${r.rate}/hr`, value: `Value: ${s}${r.value}/yr · Build cost: ${s}${r.capex} · Running: ${s}${r.opex}/yr · Payback: ${r.paybackMonths != null ? r.paybackMonths + ' mo' : 'n/a'}`, highlight: true });
       });
     }
   }
@@ -207,6 +208,46 @@ function ComputedSection({ data, useCase, index }: { data: BusinessCase; useCase
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── Augmentation computed output ──────────────────────────────────────────────
+function AugmentationOutput({ data, currencySymbol }: { data: BusinessCase; currencySymbol: string }) {
+  const aug = computeAugmentationValue(data);
+  const s = currencySymbol;
+  if (!aug) return (
+    <div style={{ padding: '12px 14px', background: '#fafaf8', border: `1px solid ${T.borderSubtle}`, borderRadius: 6, fontSize: 13, color: T.textMuted }}>
+      Fill opportunity volume, AI coverage %, outcome improvement range, and value per outcome to see expected value.
+    </div>
+  );
+
+  const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
+  const fmt = (n: number) => `${s}${n.toLocaleString()}`;
+
+  const rows: Array<{ label: string; value: string; highlight?: boolean }> = [
+    { label: 'Opportunity volume / yr', value: aug.opportunityVolume.toLocaleString() },
+    { label: 'AI coverage / adoption', value: pct(aug.aiCoverage) },
+    { label: 'Outcome improvement (low–mid–high)', value: `${pct(aug.improvementLow)} – ${pct(aug.improvementMid)} – ${pct(aug.improvementHigh)}` },
+    { label: 'Value per outcome', value: fmt(aug.valuePerOutcome) },
+    { label: 'Expected value — low', value: fmt(aug.expectedValueLow) },
+    { label: 'Expected value — mid', value: fmt(aug.expectedValueMid), highlight: true },
+    { label: 'Expected value — high', value: fmt(aug.expectedValueHigh) },
+  ];
+
+  return (
+    <div>
+      <div style={{ fontSize: 12, color: '#a3691c', background: '#fef3e2', borderRadius: 6, padding: '8px 12px', marginBottom: 12 }}>
+        The hardest assumption is the outcome improvement range — state it openly and plan to test it.
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {rows.map((r) => (
+          <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, padding: '10px 14px', background: r.highlight ? T.blueBg : '#fafaf8', borderRadius: 6, border: `1px solid ${r.highlight ? '#c0d4f5' : T.borderSubtle}` }}>
+            <span style={{ fontSize: 13, color: T.textSecondary }}>{r.label}</span>
+            <span style={{ fontSize: 13, fontWeight: r.highlight ? 700 : 600, color: r.highlight ? T.blueText : T.text }}>{r.value}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -278,9 +319,10 @@ interface AccordionModeProps {
   useCase?: UseCase;
   onApplyBuildEstimate?: (patch: Partial<BusinessCase>) => void;
   rootHandle?: FileSystemDirectoryHandle | null;
+  currencySymbol?: string;
 }
 
-export function AccordionMode({ fields, data, onChange, useCase, onApplyBuildEstimate, rootHandle }: AccordionModeProps) {
+export function AccordionMode({ fields, data, onChange, useCase, onApplyBuildEstimate, rootHandle, currencySymbol = '$' }: AccordionModeProps) {
   const groups = groupFields(fields);
   const isBC = fields === BC_FIELDS;
   const instanceCtx: UseCase | null = isBC ? (useCase ?? null) : (data as UseCase);
@@ -320,6 +362,13 @@ export function AccordionMode({ fields, data, onChange, useCase, onApplyBuildEst
           );
         }
 
+        // Augmentation computed output after "Augmentation value" section
+        if (isBC && g.name === 'Augmentation value') {
+          extra.push(
+            <AugmentationOutput key="aug-output" data={data as BusinessCase} currencySymbol={currencySymbol} />
+          );
+        }
+
         return (
           <AccordionSection
             key={g.name}
@@ -330,7 +379,7 @@ export function AccordionMode({ fields, data, onChange, useCase, onApplyBuildEst
             onChange={onChange}
             instanceCtx={instanceCtx}
             extraAfter={extra.length > 0 ? <>{extra}</> : undefined}
-            optional={g.name === 'AI token cost'}
+            optional={g.name === 'AI token cost' || g.name === 'Augmentation value'}
           />
         );
       })}
@@ -341,6 +390,7 @@ export function AccordionMode({ fields, data, onChange, useCase, onApplyBuildEst
           data={data as BusinessCase}
           useCase={ucForTerm}
           index={sectionIndex}
+          currencySymbol={currencySymbol}
         />
       )}
     </div>

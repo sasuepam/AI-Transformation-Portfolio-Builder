@@ -612,6 +612,7 @@ export function App() {
                 useCase={active}
                 onApplyBuildEstimate={updateBcMulti}
                 rootHandle={rootHandle}
+                currencySymbol={currencySymbol}
               />
             ) : (
               <ConversationalMode fields={BC_FIELDS} data={active.businessCase} onChange={updateBc} />

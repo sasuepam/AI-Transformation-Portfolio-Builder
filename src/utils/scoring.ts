@@ -244,3 +244,41 @@ export function guardrailSuggestions(uc: UseCase): string[] {
   }
   return items;
 }
+
+export interface AugmentationResult {
+  opportunityVolume: number;
+  aiCoverage: number;        // as a decimal, e.g. 0.6
+  improvementLow: number;    // as a decimal, e.g. 0.02
+  improvementHigh: number;
+  improvementMid: number;
+  valuePerOutcome: number;
+  expectedValueLow: number;
+  expectedValueMid: number;
+  expectedValueHigh: number;
+}
+
+export function computeAugmentationValue(bc: BusinessCase): AugmentationResult | null {
+  const vol = parseFloat(bc.augOpportunityVolume || '');
+  const coverage = parseFloat(bc.augAICoverage || '') / 100;
+  const improvLow = parseFloat(bc.augOutcomeImprovement?.low || '') / 100;
+  const improvHigh = parseFloat(bc.augOutcomeImprovement?.high || '') / 100;
+  const valPerOutcome = parseFloat(bc.augValuePerOutcome || '');
+
+  if (!vol || !coverage || isNaN(improvLow) || isNaN(improvHigh) || !valPerOutcome) return null;
+  if (coverage <= 0 || coverage > 1) return null;
+
+  const improvMid = (improvLow + improvHigh) / 2;
+  const base = vol * coverage * valPerOutcome;
+
+  return {
+    opportunityVolume: vol,
+    aiCoverage: coverage,
+    improvementLow: improvLow,
+    improvementHigh: improvHigh,
+    improvementMid: improvMid,
+    valuePerOutcome: valPerOutcome,
+    expectedValueLow: Math.round(base * improvLow),
+    expectedValueMid: Math.round(base * improvMid),
+    expectedValueHigh: Math.round(base * improvHigh),
+  };
+}

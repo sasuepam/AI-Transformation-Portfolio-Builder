@@ -48,6 +48,14 @@ export interface BusinessCase {
   goal?: string;
   reviewCadence?: string;
   customMetrics?: CustomMetric[];
+  // Augmentation value pathway
+  augChangedBehaviour?: string;
+  augLeadingIndicator?: string;
+  augOutcomeType?: string;
+  augOpportunityVolume?: string;
+  augAICoverage?: string;
+  augOutcomeImprovement?: RangeValue;
+  augValuePerOutcome?: string;
 }
 
 export interface UseCase {
