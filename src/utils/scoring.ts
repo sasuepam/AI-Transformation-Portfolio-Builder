@@ -2,21 +2,27 @@ import type { UseCase, BusinessCase, RangeValue } from '../types/index';
 
 const CONF_WEIGHT: Record<string, number> = { measured: 1, estimate: 0.6, speculative: 0.3 };
 
+// Rates are USD per million tokens (input / output). Updated October 2026.
 export const MODEL_PRICING: Record<string, { inRate: number | null; outRate: number | null }> = {
-  'Claude Haiku 4.5': { inRate: 1, outRate: 5 },
+  // Anthropic — platform.claude.com/docs/en/about-claude/pricing
+  'Claude Haiku 5.5': { inRate: 0.10, outRate: 0.50 },
+  'Claude Sonnet 5.5': { inRate: 2, outRate: 10 },
   'Claude Sonnet 5': { inRate: 2, outRate: 10 },
-  'Claude Sonnet 4.6': { inRate: 3, outRate: 15 },
-  'Claude Opus 5': { inRate: 5, outRate: 25 },
-  'Claude Opus 4.8': { inRate: 5, outRate: 25 },
-  'Claude Fable 5': { inRate: 10, outRate: 50 },
-  'OpenAI GPT-5.6 Luna': { inRate: 0.2, outRate: 1.2 },
+  'Claude Opus 5.5': { inRate: 4, outRate: 20 },
+  'Claude Fable 5.1': { inRate: 10, outRate: 50 },
+  // OpenAI — developers.openai.com/api/docs/pricing
+  'OpenAI GPT-5.6 Luna': { inRate: 0.20, outRate: 1.20 },
   'OpenAI GPT-5.6 Terra': { inRate: 2, outRate: 12 },
   'OpenAI GPT-5.6 Sol': { inRate: 4, outRate: 20 },
-  'Google Gemini 2.5 Flash-Lite': { inRate: 0.1, outRate: 0.4 },
-  'Google Gemini 3.6 Flash': { inRate: 0.75, outRate: 3.75 },
-  'Google Gemini 3.1 Pro': { inRate: 2, outRate: 12 },
-  'Meta Llama 4 Scout (hosted, rate varies by provider)': { inRate: 0.08, outRate: 0.3 },
-  'Meta Llama 4 Maverick (hosted, rate varies by provider)': { inRate: 0.2, outRate: 0.6 },
+  // Google — ai.google.dev/gemini-api/docs/pricing
+  'Google Gemini 2.5 Flash-Lite': { inRate: 0.10, outRate: 0.40 },
+  'Google Gemini 2.5 Flash': { inRate: 0.30, outRate: 2.50 },
+  'Google Gemini 2.5 Pro': { inRate: 1.25, outRate: 10 },
+  'Google Gemini 3.5 Flash-Lite': { inRate: 0.30, outRate: 2.50 },
+  'Google Gemini 3.8 Flash': { inRate: 0.75, outRate: 3.75 },
+  // Meta (hosted — rate varies by provider; figures are representative)
+  'Meta Llama 4 Scout (hosted, rate varies by provider)': { inRate: 0.08, outRate: 0.30 },
+  'Meta Llama 4 Maverick (hosted, rate varies by provider)': { inRate: 0.20, outRate: 0.60 },
   'Other (enter rate below)': { inRate: null, outRate: null },
 };
 
